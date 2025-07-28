@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,6 +38,27 @@ public class ItemService {
   public Optional<ItemDto> getItemByCode(String itemCode) {
     Optional<Item> item = itemRepository.findById(itemCode);
     return item.map(this::convertToDto);
+  }
+
+  public List<ItemDto> getLowStockItems(int limit) {
+    Pageable pageable = PageRequest.of(0, limit);
+    List<ItemStock> lowStockItems = itemStockRepository.findAllOrderByStockAsc(pageable);
+    
+    System.out.println("Low stock items found: " + lowStockItems.size());
+    lowStockItems.forEach(stock -> System.out.println("Item: " + stock.getItem() + ", Stock: " + stock.getStock()));
+
+    return lowStockItems.stream()
+        .map(
+            stock -> {
+              Optional<Item> item = itemRepository.findById(stock.getItem());
+              return item.map(
+                  i ->
+                      new ItemDto(
+                          i.getItem(), i.getItemCategory(), i.getItemPrice(), stock.getStock()));
+            })
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(Collectors.toList());
   }
 
   private ItemDto convertToDto(Item item) {

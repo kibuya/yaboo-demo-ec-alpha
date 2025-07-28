@@ -193,6 +193,50 @@ export class ItemList extends LitElement {
     }
   }
 
+  private async downloadLowStockPDF() {
+    try {
+      const response = await fetch('http://localhost:8080/api/pdf/low-stock');
+      
+      if (!response.ok) {
+        throw new Error('PDF生成に失敗しました');
+      }
+      
+      // Content-Typeを確認
+      const contentType = response.headers.get('Content-Type');
+      console.log('Content-Type:', contentType);
+      
+      const blob = await response.blob();
+      console.log('Blob type:', blob.type);
+      console.log('Blob size:', blob.size);
+      
+      // PDFのContent-Typeを明示的に設定
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(pdfBlob);
+      
+      // 新しいタブで開く
+      const newWindow = window.open(url, '_blank');
+      
+      if (!newWindow) {
+        // ポップアップがブロックされた場合はダウンロード
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `low-stock-report_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      
+      // 少し待ってからURLを解放
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('PDF download failed:', error);
+      alert('PDFの生成に失敗しました');
+    }
+  }
+
   private async orderItem(item: Item) {
     const customerId = localStorage.getItem('customerId');
     if (!customerId) {
@@ -272,6 +316,14 @@ export class ItemList extends LitElement {
             @yaboo-button-click=${this.loadItems}
           >
             全件表示
+          </yaboo-button>
+          <yaboo-button 
+            variant="text" 
+            size="medium" 
+            ?disabled=${this.loading}
+            @yaboo-button-click=${this.downloadLowStockPDF}
+          >
+            📊 在庫少出力
           </yaboo-button>
         </div>
       </div>

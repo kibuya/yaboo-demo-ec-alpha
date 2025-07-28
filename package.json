@@ -1,0 +1,23 @@
+{
+  "name": "yaboo-demo-ec-alpha",
+  "version": "1.0.0",
+  "description": "ECサイトアプリケーションのモノレポプロジェクト。顧客向けのオンラインショップ機能と管理者向けの管理機能を提供します。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.54.1"
+  },
+  "dependencies": {
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^5.3.93"
+  }
+}
